@@ -67,10 +67,19 @@ export async function POST(request) {
 
     const body = await request.json()
 
+    // Clean up empty string numeric fields
+    const cleanedBody = { ...body }
+    if (cleanedBody.proposal_value_discussed === '' || cleanedBody.proposal_value_discussed === null) {
+      delete cleanedBody.proposal_value_discussed
+    }
+    if (cleanedBody.duration_minutes === '' || cleanedBody.duration_minutes === null) {
+      delete cleanedBody.duration_minutes
+    }
+
     const callData = {
       id: uuidv4(),
       user_id: user.id,
-      ...body,
+      ...cleanedBody,
     }
 
     // Insert sales call

@@ -34,6 +34,7 @@ export default function SalesCallsPage() {
   const [newCall, setNewCall] = useState({
     company_id: '',
     contact_id: '',
+    contact_number: '',
     call_date: new Date().toISOString().split('T')[0],
     call_time: new Date().toTimeString().slice(0, 5),
     duration_minutes: '',
@@ -47,6 +48,7 @@ export default function SalesCallsPage() {
     revisit_time_given: '',
     revisit_notes: '',
   })
+  const [hasRevisit, setHasRevisit] = useState(false)
 
   const supabase = createClient()
 
@@ -154,6 +156,7 @@ export default function SalesCallsPage() {
     setNewCall({
       company_id: '',
       contact_id: '',
+      contact_number: '',
       call_date: new Date().toISOString().split('T')[0],
       call_time: new Date().toTimeString().slice(0, 5),
       duration_minutes: '',
@@ -167,6 +170,7 @@ export default function SalesCallsPage() {
       revisit_time_given: '',
       revisit_notes: '',
     })
+    setHasRevisit(false)
     setTimerSeconds(0)
     if (timerInterval) {
       clearInterval(timerInterval)
@@ -252,13 +256,22 @@ export default function SalesCallsPage() {
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="call_date">Call Date *</Label>
+                      <Label htmlFor="contact_number">Contact Number</Label>
+                      <Input
+                        id="contact_number"
+                        type="tel"
+                        value={newCall.contact_number}
+                        onChange={(e) => setNewCall({ ...newCall, contact_number: e.target.value })}
+                        placeholder="+91 98765 43210"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="call_date">Call Date</Label>
                       <Input
                         id="call_date"
                         type="date"
                         value={newCall.call_date}
                         onChange={(e) => setNewCall({ ...newCall, call_date: e.target.value })}
-                        required
                       />
                     </div>
                     <div>
@@ -308,8 +321,8 @@ export default function SalesCallsPage() {
                       </Select>
                     </div>
                     <div className="col-span-2">
-                      <Label>Call Outcome *</Label>
-                      <Select value={newCall.call_outcome} onValueChange={(val) => setNewCall({ ...newCall, call_outcome: val })} required>
+                      <Label>Call Outcome</Label>
+                      <Select value={newCall.call_outcome} onValueChange={(val) => setNewCall({ ...newCall, call_outcome: val })}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -331,13 +344,12 @@ export default function SalesCallsPage() {
                       </Select>
                     </div>
                     <div className="col-span-2">
-                      <Label>Discussion Summary *</Label>
+                      <Label>Discussion Summary</Label>
                       <Textarea
                         value={newCall.discussion_summary}
                         onChange={(e) => setNewCall({ ...newCall, discussion_summary: e.target.value })}
                         placeholder="Write everything discussed during the call..."
                         rows={5}
-                        required
                       />
                     </div>
                     <div className="col-span-2">
@@ -370,8 +382,9 @@ export default function SalesCallsPage() {
                       <div className="flex items-center space-x-2 mb-3">
                         <Switch
                           id="has_revisit"
-                          checked={!!newCall.revisit_date_given}
+                          checked={hasRevisit}
                           onCheckedChange={(checked) => {
+                            setHasRevisit(checked)
                             if (!checked) {
                               setNewCall({ ...newCall, revisit_date_given: '', revisit_time_given: '', revisit_notes: '' })
                             }
@@ -379,7 +392,7 @@ export default function SalesCallsPage() {
                         />
                         <Label htmlFor="has_revisit" className="font-semibold">Did the client give a revisit date?</Label>
                       </div>
-                      {newCall.revisit_date_given !== '' && (
+                      {hasRevisit && (
                         <div className="grid grid-cols-3 gap-4 pl-8 mt-3">
                           <div>
                             <Label>Revisit Date</Label>

@@ -75,10 +75,19 @@ export async function POST(request) {
       }
     }
 
+    // Clean up the body - remove empty strings for numeric fields
+    const cleanedBody = { ...body }
+    if (cleanedBody.annual_travel_budget_estimate === '' || cleanedBody.annual_travel_budget_estimate === null) {
+      delete cleanedBody.annual_travel_budget_estimate
+    }
+    if (cleanedBody.proposal_value_discussed === '' || cleanedBody.proposal_value_discussed === null) {
+      delete cleanedBody.proposal_value_discussed
+    }
+
     const companyData = {
       id: uuidv4(),
       user_id: user.id,
-      ...body,
+      ...cleanedBody,
       health_score: 50, // Default health score
     }
 
