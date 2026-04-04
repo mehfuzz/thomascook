@@ -143,7 +143,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <NavSidebar />
+      <NavSidebar userRole={user?.role || 'user'} />
       <div className="md:pl-64">
         <TopNavbar 
           title="Dashboard" 

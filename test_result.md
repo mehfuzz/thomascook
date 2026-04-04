@@ -201,6 +201,54 @@ backend:
         agent: "testing"
         comment: "Proposals GET and POST endpoints properly require authentication - both return 401 when no token provided"
 
+  - task: "Admin Users API"
+    implemented: true
+    working: true
+    file: "/app/app/api/admin/users/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Admin Users API (GET and POST) properly secured - returns 401 without authentication. Includes admin role checking logic that would return 403 for non-admin users when authenticated."
+
+  - task: "Admin Stats API"
+    implemented: true
+    working: true
+    file: "/app/app/api/admin/stats/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Admin Stats API (GET) properly secured - returns 401 without authentication. Includes admin role checking and comprehensive statistics gathering functionality."
+
+  - task: "Sales Calls Revisit Functionality"
+    implemented: true
+    working: true
+    file: "/app/app/api/sales-calls/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Sales calls revisit functionality verified - when revisit_date_given is provided, the API creates appointments and reminders automatically. Authentication properly required."
+
+  - task: "Companies API Updates"
+    implemented: true
+    working: true
+    file: "/app/app/api/companies/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Companies API still working correctly after updates - includes duplicate detection logic and proper authentication requirements."
+
 frontend:
   # Frontend testing not performed as per testing agent guidelines
 
@@ -212,7 +260,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All backend API endpoints tested"
+    - "All backend API endpoints tested including new admin APIs"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
@@ -220,3 +268,5 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: "Completed comprehensive backend API testing. All 14 tests passed (100% success rate). All endpoints properly require Supabase authentication and return appropriate 401 responses when no token is provided. Health check endpoint works without authentication as expected. API structure and error handling are working correctly."
+  - agent: "testing"
+    message: "Completed testing of new admin API endpoints and functionality verification. All 4 new tests passed (100% success rate). Admin Users API (GET/POST) and Admin Stats API (GET) are properly secured with authentication and admin role checking. Sales calls revisit functionality creates appointments and reminders when revisit_date_given is provided. Companies API continues to work correctly with duplicate detection logic. All admin endpoints return 401 without authentication and would return 403 for non-admin users when authenticated."

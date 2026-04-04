@@ -16,7 +16,7 @@ import { Switch } from '@/components/ui/switch'
 import { Plus, Phone, Clock, Play, Square } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDate, formatDateTime } from '@/lib/utils/date-utils'
-import { formatCurrency } from '@/lib/utils/currency'
+import { QuickAddCompany } from '@/components/quick-add-company'
 
 export default function SalesCallsPage() {
   const [user, setUser] = useState(null)
@@ -224,7 +224,7 @@ export default function SalesCallsPage() {
                 </DialogHeader>
                 <form onSubmit={handleAddCall} className="space-y-4 mt-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    <div className="col-span-2">
                       <Label htmlFor="company_id">Company *</Label>
                       <Select value={newCall.company_id} onValueChange={(val) => setNewCall({ ...newCall, company_id: val, contact_id: '' })} required>
                         <SelectTrigger>
@@ -236,6 +236,12 @@ export default function SalesCallsPage() {
                           ))}
                         </SelectContent>
                       </Select>
+                      <div className="mt-2">
+                        <QuickAddCompany onCompanyAdded={(company) => {
+                          loadCompanies()
+                          setNewCall({ ...newCall, company_id: company.id })
+                        }} />
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="contact_id">Contact</Label>

@@ -22,7 +22,11 @@ const navigation = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
-export function NavSidebar({ unreadCount = 0 }) {
+const adminNavigation = [
+  { name: 'Admin Dashboard', href: '/admin', icon: Settings },
+]
+
+export function NavSidebar({ unreadCount = 0, userRole = 'user' }) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -71,6 +75,30 @@ export function NavSidebar({ unreadCount = 0 }) {
                 </Link>
               )
             })}
+            {userRole === 'admin' && (
+              <>
+                <div className="border-t border-white/10 my-3"></div>
+                {adminNavigation.map((item) => {
+                  const Icon = item.icon
+                  const isActive = pathname === item.href
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={cn(
+                        'flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors relative',
+                        isActive
+                          ? 'bg-white/10 text-white'
+                          : 'text-white/70 hover:bg-white/5 hover:text-white'
+                      )}
+                    >
+                      <Icon className="mr-3 h-5 w-5" />
+                      {item.name}
+                    </Link>
+                  )
+                })}
+              </>
+            )}
           </nav>
         </ScrollArea>
 
