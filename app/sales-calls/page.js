@@ -135,7 +135,7 @@ export default function SalesCallsPage() {
       resetForm()
       loadCalls()
     } catch (error) {
-      toast.error('Failed to log call')
+      toast.error(error.message || 'Failed to log call')
       console.error(error)
     }
   }

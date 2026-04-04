@@ -74,6 +74,11 @@ export async function POST(request) {
     if (!cleanedBody.duration_minutes) delete cleanedBody.duration_minutes
     // FK/UUID fields - empty string causes FK constraint violation
     if (!cleanedBody.contact_id) delete cleanedBody.contact_id
+    // Optional text fields - store null instead of empty string
+    if (!cleanedBody.contact_number) delete cleanedBody.contact_number
+    if (!cleanedBody.competitor_mentioned) delete cleanedBody.competitor_mentioned
+    if (!cleanedBody.next_steps) delete cleanedBody.next_steps
+    if (!cleanedBody.discussion_summary) delete cleanedBody.discussion_summary
     // Date/time fields - empty string is invalid for date columns
     if (!cleanedBody.revisit_date_given) {
       delete cleanedBody.revisit_date_given
@@ -118,7 +123,7 @@ export async function POST(request) {
         id: appointmentId,
         user_id: user.id,
         company_id: body.company_id,
-        contact_id: body.contact_id,
+        ...(body.contact_id ? { contact_id: body.contact_id } : {}),
         appointment_date: body.revisit_date_given,
         appointment_time: body.revisit_time_given,
         purpose: 'Follow-up from sales call',
