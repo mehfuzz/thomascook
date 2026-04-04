@@ -1,0 +1,13 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/send-reminders",
+      "schedule": "*/30 * * * *"
+    }
+  ],
+  "functions": {
+    "api/export/**": {
+      "maxDuration": 60
+    }
+  }
+}
