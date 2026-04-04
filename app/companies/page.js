@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Plus, Building2, Search, Filter } from 'lucide-react'
 import { toast } from 'sonner'
 import { getHealthScoreBadge } from '@/lib/utils/health-score'
+import { PageLoader } from '@/components/page-loader'
 
 export default function CompaniesPage() {
   const [user, setUser] = useState(null)
@@ -169,14 +170,7 @@ export default function CompaniesPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0F2B5B] mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading companies...</p>
-        </div>
-      </div>
-    )
+    return <PageLoader message="Loading companies..." />
   }
 
   return (

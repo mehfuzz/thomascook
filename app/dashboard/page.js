@@ -12,6 +12,8 @@ import { Calendar, Phone, Building2, TrendingUp, Target, FileText, AlertCircle, 
 import { formatCurrency } from '@/lib/utils/currency'
 import { formatDate, isToday, isTomorrow, getDaysUntil } from '@/lib/utils/date-utils'
 
+import { PageLoader } from '@/components/page-loader'
+
 export default function DashboardPage() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -50,13 +52,25 @@ export default function DashboardPage() {
       }
 
       // Load user profile
-      const { data: userProfile } = await supabase
+      const { data: userProfile, error: profileError } = await supabase
         .from('users')
         .select('*')
         .eq('id', authUser.id)
         .single()
 
-      setUser(userProfile || { email: authUser.email, full_name: 'General Manager' })
+      if (profileError) {
+        console.error('Profile error:', profileError)
+        // Create basic profile if doesn't exist
+        const basicUser = {
+          id: authUser.id,
+          email: authUser.email,
+          full_name: authUser.user_metadata?.full_name || 'User',
+          role: 'user'
+        }
+        setUser(basicUser)
+      } else {
+        setUser(userProfile)
+      }
 
       // Load basic stats (simplified for now)
       const today = new Date().toISOString().split('T')[0]
@@ -131,14 +145,7 @@ export default function DashboardPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0F2B5B] mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    )
+    return <PageLoader message="Loading your dashboard..." />
   }
 
   return (

@@ -16,6 +16,8 @@ import { toast } from 'sonner'
 import { formatDate } from '@/lib/utils/date-utils'
 import { formatCurrency } from '@/lib/utils/currency'
 
+import { PageLoader } from '@/components/page-loader'
+
 export default function AdminDashboard() {
   const [user, setUser] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)

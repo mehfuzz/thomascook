@@ -18,6 +18,8 @@ import { Plus, CheckSquare, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDate, isPastDue } from '@/lib/utils/date-utils'
 
+import { PageLoader } from '@/components/page-loader'
+
 export default function TasksPage() {
   const [user, setUser] = useState(null)
   const [tasks, setTasks] = useState([])
@@ -150,14 +152,7 @@ export default function TasksPage() {
   const grouped = groupTasksByStatus()
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0F2B5B] mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading tasks...</p>
-        </div>
-      </div>
-    )
+    return <PageLoader message="Loading tasks..." />
   }
 
   return (
