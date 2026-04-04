@@ -67,13 +67,18 @@ export async function POST(request) {
 
     const body = await request.json()
 
-    // Clean up empty string numeric fields
+    // Clean up empty string fields that need to be null in the DB
     const cleanedBody = { ...body }
-    if (cleanedBody.proposal_value_discussed === '' || cleanedBody.proposal_value_discussed === null) {
-      delete cleanedBody.proposal_value_discussed
-    }
-    if (cleanedBody.duration_minutes === '' || cleanedBody.duration_minutes === null) {
-      delete cleanedBody.duration_minutes
+    // Numeric fields
+    if (!cleanedBody.proposal_value_discussed) delete cleanedBody.proposal_value_discussed
+    if (!cleanedBody.duration_minutes) delete cleanedBody.duration_minutes
+    // FK/UUID fields - empty string causes FK constraint violation
+    if (!cleanedBody.contact_id) delete cleanedBody.contact_id
+    // Date/time fields - empty string is invalid for date columns
+    if (!cleanedBody.revisit_date_given) {
+      delete cleanedBody.revisit_date_given
+      delete cleanedBody.revisit_time_given
+      delete cleanedBody.revisit_notes
     }
 
     const callData = {

@@ -19,9 +19,10 @@ import { toast } from 'sonner'
 import { formatDate, isPastDue } from '@/lib/utils/date-utils'
 
 import { PageLoader } from '@/components/page-loader'
+import { useUser } from '@/lib/contexts/user-context'
 
 export default function TasksPage() {
-  const [user, setUser] = useState(null)
+  const { user } = useUser()
   const [tasks, setTasks] = useState([])
   const [companies, setCompanies] = useState([])
   const [loading, setLoading] = useState(true)
@@ -42,22 +43,9 @@ export default function TasksPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    loadUser()
     loadTasks()
     loadCompanies()
   }, [])
-
-  async function loadUser() {
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    if (authUser) {
-      const { data: profile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .single()
-      setUser(profile || { email: authUser.email, full_name: 'GM' })
-    }
-  }
 
   async function loadTasks() {
     try {

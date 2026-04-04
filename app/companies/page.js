@@ -16,9 +16,10 @@ import { Plus, Building2, Search, Filter } from 'lucide-react'
 import { toast } from 'sonner'
 import { getHealthScoreBadge } from '@/lib/utils/health-score'
 import { PageLoader } from '@/components/page-loader'
+import { useUser } from '@/lib/contexts/user-context'
 
 export default function CompaniesPage() {
-  const [user, setUser] = useState(null)
+  const { user } = useUser()
   const [companies, setCompanies] = useState([])
   const [filteredCompanies, setFilteredCompanies] = useState([])
   const [loading, setLoading] = useState(true)
@@ -46,25 +47,12 @@ export default function CompaniesPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    loadUser()
     loadCompanies()
   }, [])
 
   useEffect(() => {
     filterCompanies()
   }, [companies, searchQuery, filterTier, filterStage])
-
-  async function loadUser() {
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    if (authUser) {
-      const { data: profile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .single()
-      setUser(profile || { email: authUser.email, full_name: 'GM' })
-    }
-  }
 
   async function loadCompanies() {
     try {
