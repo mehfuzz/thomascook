@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -65,7 +65,7 @@ export async function POST(request) {
     const { email, password, full_name, phone_number, designation, role } = body
 
     // Create auth user using admin client
-    const { data: authUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    const { data: authUser, error: createError } = await getSupabaseAdmin().auth.admin.createUser({
       email,
       password,
       email_confirm: true,
@@ -79,7 +79,7 @@ export async function POST(request) {
     }
 
     // Create user profile
-    const { data: userProfile, error: profileError } = await supabaseAdmin
+    const { data: userProfile, error: profileError } = await getSupabaseAdmin()
       .from('users')
       .insert({
         id: authUser.user.id,
@@ -94,7 +94,7 @@ export async function POST(request) {
 
     if (profileError) {
       // If profile creation fails, delete the auth user
-      await supabaseAdmin.auth.admin.deleteUser(authUser.user.id)
+      await getSupabaseAdmin().auth.admin.deleteUser(authUser.user.id)
       return NextResponse.json({ error: profileError.message }, { status: 500 })
     }
 

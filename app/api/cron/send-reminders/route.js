@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 // This route is called by Vercel Cron every 30 minutes
 export async function POST(request) {
@@ -13,7 +13,7 @@ export async function POST(request) {
     const now = new Date().toISOString()
 
     // Query for reminders that should be sent
-    const { data: reminders, error } = await supabaseAdmin
+    const { data: reminders, error } = await getSupabaseAdmin()
       .from('reminders')
       .select('*')
       .eq('is_sent', false)
@@ -37,7 +37,7 @@ export async function POST(request) {
     // They will be displayed in the app via Supabase Realtime
     const reminderIds = reminders.map(r => r.id)
 
-    const { error: updateError } = await supabaseAdmin
+    const { error: updateError } = await getSupabaseAdmin()
       .from('reminders')
       .update({ 
         is_sent: true, 
