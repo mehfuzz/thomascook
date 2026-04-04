@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useUser } from '@/lib/contexts/user-context'
 import { NavSidebar } from '@/components/nav-sidebar'
 import { TopNavbar } from '@/components/top-navbar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,7 +16,7 @@ import { formatDate, isToday, isTomorrow, getDaysUntil } from '@/lib/utils/date-
 import { PageLoader } from '@/components/page-loader'
 
 export default function DashboardPage() {
-  const [user, setUser] = useState(null)
+  const { user, userLoading } = useUser()
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     todayCalls: 0,
@@ -35,85 +36,38 @@ export default function DashboardPage() {
     monthly: { calls: 0, meetings: 0, revenue: 0, proposals: 0, callsTarget: 200, meetingsTarget: 60, revenueTarget: 2000000, proposalsTarget: 20 }
   })
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  
+
   const supabase = createClient()
 
   useEffect(() => {
+    if (userLoading) return
+    if (!user) {
+      window.location.href = '/login'
+      return
+    }
     loadDashboardData()
-  }, [])
+  }, [user, userLoading])
 
   async function loadDashboardData() {
     try {
-      const { data: { user: authUser } } = await supabase.auth.getUser()
-      
-      if (!authUser) {
-        window.location.href = '/login'
-        return
-      }
-
-      // Load user profile
-      const { data: userProfile, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .single()
-
-      if (profileError) {
-        console.error('Profile error:', profileError)
-        // Create basic profile if doesn't exist
-        const basicUser = {
-          id: authUser.id,
-          email: authUser.email,
-          full_name: authUser.user_metadata?.full_name || 'User',
-          role: 'user'
-        }
-        setUser(basicUser)
-      } else {
-        setUser(userProfile)
-      }
-
-      // Load basic stats (simplified for now)
       const today = new Date().toISOString().split('T')[0]
-      
-      // Count today's calls
-      const { count: todayCallsCount } = await supabase
-        .from('sales_calls')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', authUser.id)
-        .eq('call_date', today)
 
-      // Count today's appointments
-      const { data: todayAppointments } = await supabase
-        .from('appointments')
-        .select('*, companies(company_name)')
-        .eq('user_id', authUser.id)
-        .eq('appointment_date', today)
-        .order('appointment_time', { ascending: true })
-
-      // Count active companies
-      const { count: companiesCount } = await supabase
-        .from('companies')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', authUser.id)
-
-      // Count open proposals and sum their value
-      const { data: proposals } = await supabase
-        .from('proposals')
-        .select('proposal_value')
-        .eq('user_id', authUser.id)
-        .in('status', ['Sent', 'Under Review', 'Revision Requested'])
+      // Run all queries in parallel
+      const [
+        { count: todayCallsCount },
+        { data: todayAppointments },
+        { count: companiesCount },
+        { data: proposals },
+        { data: highPriorityTasks },
+      ] = await Promise.all([
+        supabase.from('sales_calls').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('call_date', today),
+        supabase.from('appointments').select('*, companies(company_name)').eq('user_id', user.id).eq('appointment_date', today).order('appointment_time', { ascending: true }),
+        supabase.from('companies').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('proposals').select('proposal_value').eq('user_id', user.id).in('status', ['Sent', 'Under Review', 'Revision Requested']),
+        supabase.from('tasks').select('*, companies(company_name)').eq('user_id', user.id).eq('priority', 'High').eq('status', 'Pending').order('due_date', { ascending: true }).limit(5),
+      ])
 
       const openProposalsValue = proposals?.reduce((sum, p) => sum + parseFloat(p.proposal_value || 0), 0) || 0
-
-      // Get pending high priority tasks
-      const { data: highPriorityTasks } = await supabase
-        .from('tasks')
-        .select('*, companies(company_name)')
-        .eq('user_id', authUser.id)
-        .eq('priority', 'High')
-        .eq('status', 'Pending')
-        .order('due_date', { ascending: true })
-        .limit(5)
 
       setStats({
         todayCalls: todayCallsCount || 0,

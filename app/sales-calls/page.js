@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useUser } from '@/lib/contexts/user-context'
 import { NavSidebar } from '@/components/nav-sidebar'
 import { TopNavbar } from '@/components/top-navbar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,7 +22,7 @@ import { QuickAddCompany } from '@/components/quick-add-company'
 import { PageLoader } from '@/components/page-loader'
 
 export default function SalesCallsPage() {
-  const [user, setUser] = useState(null)
+  const { user } = useUser()
   const [calls, setCalls] = useState([])
   const [companies, setCompanies] = useState([])
   const [contacts, setContacts] = useState([])
@@ -53,7 +54,6 @@ export default function SalesCallsPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    loadUser()
     loadCalls()
     loadCompanies()
   }, [])
@@ -69,18 +69,6 @@ export default function SalesCallsPage() {
       if (timerInterval) clearInterval(timerInterval)
     }
   }, [timerInterval])
-
-  async function loadUser() {
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    if (authUser) {
-      const { data: profile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .single()
-      setUser(profile || { email: authUser.email, full_name: 'GM' })
-    }
-  }
 
   async function loadCalls() {
     try {

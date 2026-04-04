@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { NavSidebar } from '@/components/nav-sidebar'
 import { TopNavbar } from '@/components/top-navbar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,9 +8,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
+import { useUser } from '@/lib/contexts/user-context'
 
 export default function SettingsPage() {
-  const [user, setUser] = useState(null)
+  const { user, invalidateUser } = useUser()
   const [profile, setProfile] = useState({
     full_name: '',
     email: '',
@@ -20,32 +20,17 @@ export default function SettingsPage() {
   })
   const [loading, setLoading] = useState(false)
 
-  const supabase = createClient()
-
+  // Populate form once user is available from context
   useEffect(() => {
-    loadProfile()
-  }, [])
-
-  async function loadProfile() {
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    if (authUser) {
-      const { data: userProfile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .single()
-      
-      if (userProfile) {
-        setUser(userProfile)
-        setProfile({
-          full_name: userProfile.full_name || '',
-          email: userProfile.email || '',
-          phone_number: userProfile.phone_number || '',
-          designation: userProfile.designation || '',
-        })
-      }
+    if (user) {
+      setProfile({
+        full_name: user.full_name || '',
+        email: user.email || '',
+        phone_number: user.phone_number || '',
+        designation: user.designation || '',
+      })
     }
-  }
+  }, [user])
 
   async function handleSave(e) {
     e.preventDefault()
@@ -61,7 +46,7 @@ export default function SettingsPage() {
       if (!response.ok) throw new Error('Failed to update profile')
 
       toast.success('Profile updated successfully!')
-      loadProfile()
+      invalidateUser()
     } catch (error) {
       toast.error('Failed to update profile')
       console.error(error)

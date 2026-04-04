@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { NavSidebar } from '@/components/nav-sidebar'
 import { TopNavbar } from '@/components/top-navbar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,9 +16,10 @@ import { formatDate } from '@/lib/utils/date-utils'
 import { formatCurrency } from '@/lib/utils/currency'
 
 import { PageLoader } from '@/components/page-loader'
+import { useUser } from '@/lib/contexts/user-context'
 
 export default function AdminDashboard() {
-  const [user, setUser] = useState(null)
+  const { user, userLoading } = useUser()
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState(null)
@@ -35,47 +35,33 @@ export default function AdminDashboard() {
     role: 'user',
   })
 
-  const supabase = createClient()
-
   useEffect(() => {
-    loadData()
-  }, [])
+    if (userLoading) return
+    if (!user) {
+      window.location.href = '/login'
+      return
+    }
+    if (user.role !== 'admin') {
+      toast.error('Admin access required')
+      window.location.href = '/dashboard'
+      return
+    }
+    setIsAdmin(true)
+    loadAdminData()
+  }, [user, userLoading])
 
-  async function loadData() {
+  async function loadAdminData() {
     try {
-      const { data: { user: authUser } } = await supabase.auth.getUser()
-      
-      if (!authUser) {
-        window.location.href = '/login'
-        return
-      }
-
-      // Load user profile
-      const { data: userProfile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .single()
-
-      if (!userProfile || userProfile.role !== 'admin') {
-        toast.error('Admin access required')
-        window.location.href = '/dashboard'
-        return
-      }
-
-      setUser(userProfile)
-      setIsAdmin(true)
-
-      // Load admin stats
-      const statsResponse = await fetch('/api/admin/stats')
-      const statsData = await statsResponse.json()
+      const [statsResponse, usersResponse] = await Promise.all([
+        fetch('/api/admin/stats'),
+        fetch('/api/admin/users'),
+      ])
+      const [statsData, usersData] = await Promise.all([
+        statsResponse.json(),
+        usersResponse.json(),
+      ])
       setStats(statsData)
-
-      // Load all users
-      const usersResponse = await fetch('/api/admin/users')
-      const usersData = await usersResponse.json()
       setUsers(usersData.users || [])
-
       setLoading(false)
     } catch (error) {
       console.error('Error loading admin data:', error)
