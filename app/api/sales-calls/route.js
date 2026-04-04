@@ -79,11 +79,15 @@ export async function POST(request) {
     if (!cleanedBody.competitor_mentioned) delete cleanedBody.competitor_mentioned
     if (!cleanedBody.next_steps) delete cleanedBody.next_steps
     if (!cleanedBody.discussion_summary) delete cleanedBody.discussion_summary
-    // Date/time fields - empty string is invalid for date columns
+    // Time fields - empty string is invalid for TIME columns
+    if (!cleanedBody.call_time) delete cleanedBody.call_time
+    // Date/time fields - empty string is invalid for date/time columns
     if (!cleanedBody.revisit_date_given) {
       delete cleanedBody.revisit_date_given
       delete cleanedBody.revisit_time_given
       delete cleanedBody.revisit_notes
+    } else if (!cleanedBody.revisit_time_given) {
+      delete cleanedBody.revisit_time_given
     }
 
     const callData = {
