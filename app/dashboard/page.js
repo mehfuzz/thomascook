@@ -24,9 +24,7 @@ export default function DashboardPage() {
     openProposalsValue: 0,
     todayAppointments: [],
     upcomingRevisits: [],
-    overdueT
-
-asks: 0,
+    overdueTasks: 0,
     pendingHighPriorityTasks: [],
   })
   const [targets, setTargets] = useState({
