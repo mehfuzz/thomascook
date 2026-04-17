@@ -104,7 +104,7 @@ export default function VendorOnboardingPage() {
   const [gstLoading, setGstLoading] = useState(false)
   const [gstData, setGstData] = useState(null)
   const [gstError, setGstError] = useState('')
-  const [isDemo, setIsDemo] = useState(false)
+  const [isDemo, setIsDemo] = useState(true)
 
   // --- Duplicate check state ---
   const [dupLoading, setDupLoading] = useState(false)
