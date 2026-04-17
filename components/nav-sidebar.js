@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Phone, Calendar, Building2, Target, CheckSquare, FileText, Bell, Download, Settings, LogOut } from 'lucide-react'
+import { Home, Phone, Calendar, Building2, Target, CheckSquare, FileText, Bell, Download, Settings, LogOut, UserPlus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -18,6 +18,7 @@ const navigation = [
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { name: 'Proposals', href: '/proposals', icon: FileText },
   { name: 'Reminders', href: '/reminders', icon: Bell },
+  { name: 'Vendor Onboarding', href: '/vendor-onboarding', icon: UserPlus },
   { name: 'Export MIS', href: '/export', icon: Download },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
