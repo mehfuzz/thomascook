@@ -104,6 +104,7 @@ export default function VendorOnboardingPage() {
   const [gstLoading, setGstLoading] = useState(false)
   const [gstData, setGstData] = useState(null)
   const [gstError, setGstError] = useState('')
+  const [isDemo, setIsDemo] = useState(false)
 
   // --- Duplicate check state ---
   const [dupLoading, setDupLoading] = useState(false)
@@ -137,24 +138,21 @@ export default function VendorOnboardingPage() {
     setGstError('')
     setGstData(null)
     setDupMatches(null)
+    setIsDemo(false)
 
     try {
       const res = await fetch(`/api/gst-lookup?gstin=${encodeURIComponent(trimmed)}`)
       const result = await res.json()
 
       if (!res.ok) {
-        if (res.status === 409) {
-          setGstError(result.message || 'This GSTIN is already registered.')
-        } else if (res.status === 404) {
-          setGstError('GSTIN not found. Please verify the number and try again.')
-        } else {
-          setGstError(result.message || 'Failed to fetch GST details. Please try again.')
-        }
+        setGstError(result.message || 'Failed to fetch GST details. Please try again.')
         return
       }
 
-      setGstData(result.gst_details)
-      toast.success('GST details fetched successfully')
+      const details = result.gst_details
+      setIsDemo(!!details._demo)
+      setGstData(details)
+      toast.success(details._demo ? 'Loaded demo data (GST portal unavailable)' : 'GST details fetched successfully')
 
       // Immediately run duplicate check
       await runDuplicateCheck(result.gst_details)
@@ -373,6 +371,20 @@ export default function VendorOnboardingPage() {
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-700">
                   No duplicate vendors found based on address, owner name, or PAN.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* ── Demo mode banner ── */}
+            {isDemo && (
+              <Alert className="border-blue-300 bg-blue-50">
+                <Info className="h-4 w-4 text-blue-600" />
+                <AlertTitle className="text-blue-700">Demo Mode — Sample Data</AlertTitle>
+                <AlertDescription className="text-blue-600 text-sm">
+                  The GST portal is currently unreachable. Showing sample data so you can test the form.
+                  For live data, set <code className="bg-blue-100 px-1 rounded">GST_DEMO_MODE=false</code> and
+                  configure <code className="bg-blue-100 px-1 rounded">GST_API_URL</code> +{' '}
+                  <code className="bg-blue-100 px-1 rounded">GST_API_KEY</code> with a provider like Karza or Signzy.
                 </AlertDescription>
               </Alert>
             )}
